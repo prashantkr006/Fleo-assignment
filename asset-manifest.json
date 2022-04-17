@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/Fleo-assignment/static/css/main.a790ee78.css",
-    "main.js": "/Fleo-assignment/static/js/main.55c34a42.js",
-    "static/js/787.8e84bebf.chunk.js": "/Fleo-assignment/static/js/787.8e84bebf.chunk.js",
-    "index.html": "/Fleo-assignment/index.html",
-    "main.a790ee78.css.map": "/Fleo-assignment/static/css/main.a790ee78.css.map",
-    "main.55c34a42.js.map": "/Fleo-assignment/static/js/main.55c34a42.js.map",
-    "787.8e84bebf.chunk.js.map": "/Fleo-assignment/static/js/787.8e84bebf.chunk.js.map"
+    "main.css": "/static/css/main.a790ee78.css",
+    "main.js": "/static/js/main.67ffbee7.js",
+    "static/js/787.8e84bebf.chunk.js": "/static/js/787.8e84bebf.chunk.js",
+    "index.html": "/index.html",
+    "main.a790ee78.css.map": "/static/css/main.a790ee78.css.map",
+    "main.67ffbee7.js.map": "/static/js/main.67ffbee7.js.map",
+    "787.8e84bebf.chunk.js.map": "/static/js/787.8e84bebf.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a790ee78.css",
-    "static/js/main.55c34a42.js"
+    "static/js/main.67ffbee7.js"
   ]
 }
