@@ -16,7 +16,7 @@ import {
   InputAdornment,
 } from "@material-ui/core";
 import axios from "axios";
-import Controls from "./constrols/Controls";
+import { TextField } from "@mui/material";
 
 const theme = createTheme({
   palette: {
@@ -71,19 +71,19 @@ function RepoList() {
   const [page, setPage] = React.useState(0);
   const [order, setOrder] = useState();
   const [orderBy, setOrderBy] = useState();
-  const [filterFn, setFilterFn] = useState({
-    fn: (items) => {
-      return items;
-    },
-  });
+  const [text, setText] = useState("");
+  const [filterTable, setFilterTable] = useState([]);
   //load data
   useEffect(() => {
-    axios
-      .get(baseURL)
-      .then((Response) => {
-        setData(Response.data.items);
-      })
-      .catch(console.error);
+    const getRepo = async () => {
+      try {
+        const response = await axios.get(baseURL);
+        setData(response.data.items);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getRepo();
   }, []);
 
   const handleSortRequest = (cellId) => {
@@ -126,24 +126,27 @@ function RepoList() {
     setPage(0);
   };
 
-  const handleSearch = (e) => {
-    let target = e.target;
-    setFilterFn({
-      fn: (items) => {
-        if (target.value === "") return items;
-        else
-          return items.filter((x) =>
-            x.fullName.toLowerCase().includes(target.value)
-          );
-      },
-    });
+  const filterData = (e) => {
+    console.log(e.target.value);
+    if (e.target.value !== "") {
+      setText(e.target.value);
+      const filterTable = data.filter((o) =>
+        Object.keys(o).some((k) =>
+          String(o[k]).toLowerCase().includes(e.target.value.toLowerCase())
+        )
+      );
+      setFilterTable([...filterTable]);
+    } else {
+      setText(e.target.value);
+      setData([...data]);
+    }
   };
 
   const classes = useStyles();
   return (
     <>
       <Toolbar className={classes.Toolbar} component={Paper}>
-        <Controls.Input
+        <TextField
           label="Search..."
           className={classes.MuiFormControlRoot}
           InputProps={{
@@ -153,7 +156,8 @@ function RepoList() {
               </InputAdornment>
             ),
           }}
-          onChange={handleSearch}
+          value={text}
+          onChange={filterData}
         />
       </Toolbar>
       <TableContainer component={Paper} className={classes.tableContainer}>
@@ -185,24 +189,43 @@ function RepoList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {stableSort(filterFn.fn(data), getComparator(order, orderBy))
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>
-                    <a href={row.html_url} target="_blank" rel="noreferrer">
-                      {row.name}
-                    </a>
-                  </TableCell>
-                  <TableCell sx={{ width: "100px" }}>
-                    {row.description}
-                  </TableCell>
-                  <TableCell>{row.owner.login}</TableCell>
-                  <TableCell>{row.stargazers_count}</TableCell>
-                  <TableCell>{row.forks_count}</TableCell>
-                  <TableCell>{row.language}</TableCell>
-                </TableRow>
-              ))}
+            {text.length > 0
+              ? stableSort(filterTable, getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell>
+                        <a href={row.html_url} target="_blank" rel="noreferrer">
+                          {row.name}
+                        </a>
+                      </TableCell>
+                      <TableCell sx={{ width: "100px" }}>
+                        {row.description}
+                      </TableCell>
+                      <TableCell>{row.owner.login}</TableCell>
+                      <TableCell>{row.stargazers_count}</TableCell>
+                      <TableCell>{row.forks_count}</TableCell>
+                      <TableCell>{row.language}</TableCell>
+                    </TableRow>
+                  ))
+              : stableSort(data, getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell>
+                        <a href={row.html_url} target="_blank" rel="noreferrer">
+                          {row.name}
+                        </a>
+                      </TableCell>
+                      <TableCell sx={{ width: "100px" }}>
+                        {row.description}
+                      </TableCell>
+                      <TableCell>{row.owner.login}</TableCell>
+                      <TableCell>{row.stargazers_count}</TableCell>
+                      <TableCell>{row.forks_count}</TableCell>
+                      <TableCell>{row.language}</TableCell>
+                    </TableRow>
+                  ))}
           </TableBody>
         </Table>
         <Paper>
