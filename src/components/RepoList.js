@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createTheme } from "@mui/material/styles";
+import { Search } from "@material-ui/icons";
 import {
   Table,
   TableContainer,
@@ -11,10 +12,11 @@ import {
   makeStyles,
   TablePagination,
   TableSortLabel,
-  TextField,
   Toolbar,
+  InputAdornment,
 } from "@material-ui/core";
 import axios from "axios";
+import Controls from "./constrols/Controls";
 
 const theme = createTheme({
   palette: {
@@ -26,7 +28,7 @@ const theme = createTheme({
 
 const useStyles = makeStyles({
   tableContainer: {
-    margin: "10%",
+    margin: "5%",
     borderRadius: 15,
     width: "90%",
   },
@@ -41,14 +43,14 @@ const useStyles = makeStyles({
     },
   },
   Toolbar: {
-    marginTop: '30px',
-    width: '90%',
-    padding: '10px'
+    marginTop: "30px",
+    width: "90%",
+    padding: "10px",
   },
   MuiFormControlRoot: {
-    backgroundColor: 'white',
-    width: '90%'
-  }
+    backgroundColor: "white",
+    width: "90%",
+  },
 });
 
 const baseURL =
@@ -69,6 +71,11 @@ function RepoList() {
   const [page, setPage] = React.useState(0);
   const [order, setOrder] = useState();
   const [orderBy, setOrderBy] = useState();
+  const [filterFn, setFilterFn] = useState({
+    fn: (items) => {
+      return items;
+    },
+  });
   //load data
   useEffect(() => {
     axios
@@ -119,77 +126,97 @@ function RepoList() {
     setPage(0);
   };
 
+  const handleSearch = (e) => {
+    let target = e.target;
+    setFilterFn({
+      fn: (items) => {
+        if (target.value === "") return items;
+        else
+          return items.filter((x) =>
+            x.fullName.toLowerCase().includes(target.value)
+          );
+      },
+    });
+  };
+
   const classes = useStyles();
   return (
     <>
-    <Toolbar 
-    className={classes.Toolbar}
-    component={Paper}>
-    <TextField
-    className={classes.MuiFormControlRoot}
-    variant="outlined"
-    placeholder="search..."
-     />
-    </Toolbar>
-    <TableContainer component={Paper} className={classes.tableContainer}>
-      <Table stickyHeader>
-        <TableHead>
-          <TableRow>
-            {columnHeaders.map((column) => (
-              <TableCell
-                key={column.id}
-                className={classes.tableHeaderCell}
-                sortDirection={orderBy === column.id ? order : false}
-              >
-                {column.disableSorting ? (
-                  column.label
-                ) : (
-                  <TableSortLabel
-                    active={orderBy === column.id}
-                    direction={orderBy === column.id ? order : "asc"}
-                    className={classes.TableSortLabel}
-                    onClick={() => {
-                      handleSortRequest(column.id);
-                    }}
-                  >
-                    {column.label}
-                  </TableSortLabel>
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {stableSort(data, getComparator(order, orderBy))
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>
-                  <a href={row.html_url} target="_blank" rel="noreferrer">
-                    {row.name}
-                  </a>
-                </TableCell>
-                <TableCell sx={{ width: "100px" }}>{row.description}</TableCell>
-                <TableCell>{row.owner.login}</TableCell>
-                <TableCell>{row.stargazers_count}</TableCell>
-                <TableCell>{row.forks_count}</TableCell>
-                <TableCell>{row.language}</TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
-      <Paper>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 20]}
-          component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
+      <Toolbar className={classes.Toolbar} component={Paper}>
+        <Controls.Input
+          label="Search..."
+          className={classes.MuiFormControlRoot}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          onChange={handleSearch}
         />
-      </Paper>
-    </TableContainer>
+      </Toolbar>
+      <TableContainer component={Paper} className={classes.tableContainer}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              {columnHeaders.map((column) => (
+                <TableCell
+                  key={column.id}
+                  className={classes.tableHeaderCell}
+                  sortDirection={orderBy === column.id ? order : false}
+                >
+                  {column.disableSorting ? (
+                    column.label
+                  ) : (
+                    <TableSortLabel
+                      active={orderBy === column.id}
+                      direction={orderBy === column.id ? order : "asc"}
+                      className={classes.TableSortLabel}
+                      onClick={() => {
+                        handleSortRequest(column.id);
+                      }}
+                    >
+                      {column.label}
+                    </TableSortLabel>
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {stableSort(filterFn.fn(data), getComparator(order, orderBy))
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>
+                    <a href={row.html_url} target="_blank" rel="noreferrer">
+                      {row.name}
+                    </a>
+                  </TableCell>
+                  <TableCell sx={{ width: "100px" }}>
+                    {row.description}
+                  </TableCell>
+                  <TableCell>{row.owner.login}</TableCell>
+                  <TableCell>{row.stargazers_count}</TableCell>
+                  <TableCell>{row.forks_count}</TableCell>
+                  <TableCell>{row.language}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        <Paper>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 20]}
+            component="div"
+            count={data.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+          />
+        </Paper>
+      </TableContainer>
     </>
   );
 }
