@@ -128,7 +128,7 @@ function RepoList() {
     <TextField
     className={classes.MuiFormControlRoot}
     variant="outlined"
-    placeholder="search"
+    placeholder="search..."
      />
     </Toolbar>
     <TableContainer component={Paper} className={classes.tableContainer}>
